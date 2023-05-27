@@ -32,20 +32,50 @@
 
 ## 代码
 
+考虑四种字符
+
+1. 首部空格：删除
+
+2. 符号位：“+”、“-”、“无符号"；新建变量保存符号位
+
+3. 非数字：首次遇到，返回
+
+4. 数字符号：拼接公式
+
+   设当前字符 <i>c</i>，当前数字 <i>x</i>，数字结果 <i>res</i>，则拼接公式为：
+
+   ```matlab
+   res = 10 * res + x
+   x = ascii(c) - ascii('0')
+   ```
+
+结果越界处理
+
+返回结果的数值范围应在[-2^31, 2^31 - 1].若越界，要始终爆出 <i>res</i>在int类型的取值范围内。
+
+​	在数字拼接前，判断 <i>res</i> 拼接后是否超过2147483647，设数字拼接边界bndry = 2147483647 // 10 = 214748364,则
+
++ res > bndry              拼接 10 * res ≥ 2147483647 越界
++ res = bndry, x > 7    拼接后是2147483648 、 2147483649
+
+
+
 ```java
 class Solution {
     public int strToInt(String str) {
-        char[] c = str.trim().toCharArray();
-        if(c.length == 0) return 0;
+        char[] ch = str.trim().toCharArray();
+        if(ch.length == 0) return 0;
         int res = 0, bndry = Integer.MAX_VALUE / 10;
         int i = 1, sign = 1;
-        if(c[0] == '-') sign = -1;
-        else if(c[0] != '+') i = 0;
-        for(int j = i; j < c.length; j++) {
-            if(c[j] < '0' || c[j] > '9') break;
-            if(res > bndry || res == bndry && c[j] > '7') return sign == 1 ? Integer.MAX_VALUE : Integer.MIN_VALUE;
-            res = res * 10 + (c[j] - '0');
+        
+        if(ch[0] == '-') sign = -1;
+        else if(ch[0] != '+') i = 0;
+        for(int j = i; j < ch.length; j++) {
+            if(ch[j] < '0' || ch[j] > '9') break;
+            if(res > bndry || res == bndry && ch[j] > '7') return sign == 1 ? Integer.MAX_VALUE : Integer.MIN_VALUE;
+            res = res * 10 + (ch[j] - '0');
         }
+        
         return sign * res;
     }
 }
